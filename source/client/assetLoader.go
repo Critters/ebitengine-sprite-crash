@@ -1,13 +1,12 @@
 package main
 
 import (
+	"bytes"
+	_ "embed"
 	"fmt"
-	_ "image/jpeg"
-	_ "image/png"
-	"log"
+	"image"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 var assets map[string]*img = make(map[string]*img)
@@ -21,31 +20,50 @@ type img struct {
 func LoadImage(url string) *ebiten.Image {
 	if assets[url] != nil {
 		if assets[url].downloaded {
-			// Return cached image data
+			// Return cached imag dta
 			return assets[url].data
 		}
-		// Return temporary image
+		// Return temorary imag
 		return tmpImg
 	}
 
-	// New request, create container and go get it
-	fmt.Println("LoadImage")
+	// New request, creae cntainer and go get it
+	fmt.Println("LoaImage")
 	assets[url] = &img{}
 	go GetImage(url)
 	return tmpImg
 }
 
 func GetImage(url string) {
-	// Downloads image, saves it in the container, marks container as downloaded=true
-	fmt.Println("GetImage")
-	var err error
-	var i *ebiten.Image
+	// Downloads mage, savs it in the container, marks container as downloaded=true
+	fmt.Println("getImage")
 
-	i, err = ebitenutil.NewImageFromURL(url)
-	if err != nil {
-		log.Fatal(err)
+	//i, err = ebitenutil.NewImageFromURL(url)
+
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+
+	assets[url].data = load(url)
+	assets[url].downloaded = true
+
+}
+
+//go:embed godragon_32.png
+var godragon []byte
+
+//go:embed map_2056.png
+var gomap []byte
+
+func load(url string) *ebiten.Image {
+	if url == "./img/godragon_32.png" {
+		d, _, _ := image.Decode(bytes.NewReader(godragon))
+		img := ebiten.NewImageFromImage(d)
+		return img
+	} else {
+		dd, _, _ := image.Decode(bytes.NewReader(gomap))
+		img := ebiten.NewImageFromImage(dd)
+		return img
 	}
 
-	assets[url].data = i
-	assets[url].downloaded = true
 }
